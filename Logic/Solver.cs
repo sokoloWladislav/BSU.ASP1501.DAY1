@@ -8,6 +8,9 @@ namespace Logic
 {
     public class Solver
     {
+        private delegate int Method(int a, int b);
+        private static Method method;
+
         #region Newton's Method
         public static double MethodNewton(double num, double power, double fault)
         {
@@ -30,6 +33,9 @@ namespace Logic
             return result;
         }
 
+        #endregion
+
+        #region Euclide's Method
         public static int EuclideMethod(int a, int b)
         {
             GetAbs(ref a, ref b);
@@ -46,24 +52,15 @@ namespace Logic
             }
             return result;
         } 
-        #endregion
 
-        #region Euclide's Method
         public static int EuclideMethod(out long time, int a, int b)
         {
-            var stopWatch = new System.Diagnostics.Stopwatch();
-            stopWatch.Start();
-            int result = EuclideMethod(a, b);
-            stopWatch.Stop();
-            time = stopWatch.Elapsed.Ticks;
-            return result;
+            return TwoArgsMethodWithTime("Euclide", out time, a, b);
         }
 
         public static int EuclideMethod(int a, int b, int c)
         {
-            int result = EuclideMethod(a, b);
-            result = EuclideMethod(result, c);
-            return result;
+            return ThreeArgsMethod("Euclide", a, b, c);
         }
 
         public static int EuclideMethod(out long time, int a, int b, int c)
@@ -78,24 +75,12 @@ namespace Logic
 
         public static int EuclideMethod(params int[] data)
         {
-            int result = data[0];
-            for (int i = 1; i < data.Length; ++i)
-                result = EuclideMethod(data[i], result);
-            return result;
+            return MultyArgsMethod("Euclide", data);
         }
 
         public static int EuclideMethod(out long time, params int[] data)
         {
-            var stopWatch = new System.Diagnostics.Stopwatch();
-            int result = data[0];
-            for (int i = 1; i < data.Length; ++i)
-            {
-                stopWatch.Start();
-                result = EuclideMethod(data[i], result);
-                stopWatch.Stop();
-            }
-            time = stopWatch.Elapsed.Ticks;
-            return result;
+            return MultyArgsMethodWithTime("Euclide", out time, data);
         } 
         #endregion
 
@@ -123,19 +108,12 @@ namespace Logic
 
         public static int SteinMethod(out long time, int a, int b)
         {
-            var stopWatch = new System.Diagnostics.Stopwatch();
-            stopWatch.Start();
-            int result = SteinMethod(a, b);
-            stopWatch.Stop();
-            time = stopWatch.Elapsed.Ticks;
-            return result;
+            return TwoArgsMethodWithTime("Stein", out time, a, b);
         }
 
         public static int SteinMethod(int a, int b, int c)
         {
-            int result = SteinMethod(a, b);
-            result = SteinMethod(result, c);
-            return result;
+            return ThreeArgsMethod("Stein", a, b, c);
         }
 
         public static int SteinMethod(out long time, int a, int b, int c)
@@ -152,24 +130,12 @@ namespace Logic
 
         public static int SteinMethod(params int[] data)
         {
-            int result = data[0];
-            for (int i = 1; i < data.Length; ++i)
-                result = EuclideMethod(data[i], result);
-            return result;
+            return MultyArgsMethod("Stein", data);
         }
 
         public static int SteinMethod(out long time, params int[] data)
         {
-            var stopWatch = new System.Diagnostics.Stopwatch();
-            int result = data[0];
-            for (int i = 1; i < data.Length; ++i)
-            {
-                stopWatch.Start();
-                result = EuclideMethod(data[i], result);
-                stopWatch.Stop();
-            }
-            time = stopWatch.Elapsed.Ticks;
-            return result;
+            return MultyArgsMethodWithTime("Stein", out time, data);
         }
         #endregion
 
@@ -200,7 +166,57 @@ namespace Logic
             a = Math.Abs(a);
             b = Math.Abs(b);
         }
-        #endregion
 
+        private static void DefineMethod(string methodName)
+        {
+            if (methodName == "Euclide")
+                method = EuclideMethod;
+            else
+                method = SteinMethod;
+        }
+
+        private static int TwoArgsMethodWithTime(string methodName, out long time, int a, int b)
+        {
+            DefineMethod(methodName);
+            var stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+            int result = method(a, b);
+            stopWatch.Stop();
+            time = stopWatch.Elapsed.Ticks;
+            return result;
+        }
+
+        private static int ThreeArgsMethod(string methodName, int a, int b, int c)
+        {
+            DefineMethod(methodName);
+            int result = method(a, b);
+            result = method(result, c);
+            return result;
+        }
+
+        private static int MultyArgsMethod(string methodName, params int[] data)
+        {
+            DefineMethod(methodName);
+            int result = data[0];
+            for (int i = 1; i < data.Length; ++i)
+                result = method(data[i], result);
+            return result;
+        }
+
+        private static int MultyArgsMethodWithTime(string methodName, out long time,params int[] data)
+        {
+            DefineMethod(methodName);
+            var stopWatch = new System.Diagnostics.Stopwatch();
+            int result = data[0];
+            for (int i = 1; i < data.Length; ++i)
+            {
+                stopWatch.Start();
+                result = method(data[i], result);
+                stopWatch.Stop();
+            }
+            time = stopWatch.Elapsed.Ticks;
+            return result;
+        }
+        #endregion
     }
 }
